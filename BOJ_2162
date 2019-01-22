@@ -1,0 +1,110 @@
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+int A[3001];
+vector <pair<int, int> > point[3001];
+
+
+int find(int x) {
+
+	if (A[x] < 0) return x;
+
+	return A[x] = find(A[x]);
+}
+
+void uni(int a, int b) {
+	
+	int aRoot = find(a);
+	int bRoot = find(b);
+
+	if (aRoot != bRoot) {
+		A[aRoot] += A[bRoot];
+		A[bRoot] = aRoot;
+	}
+}
+
+
+
+int ccw(int ax, int ay, int bx, int by, int cx, int cy) {
+	long long aa = (ax*by + bx*cy + cx*ay);
+	long long bb = (ay*bx + by*cx + cy*ax);
+	
+	if (aa-bb == 0) return 0;
+	else if (aa-bb < 0) return -1;
+	else if (aa-bb > 0) return 1;
+	
+}
+int main() {
+
+	int N; scanf("%d", &N);
+
+	memset(A, -1, sizeof(A));
+
+	for (int i = 0; i < N; i++) {
+		int x1, y1, x2, y2; cin >> x1 >> y1 >> x2 >> y2;
+		point[i].push_back({ x1,y1 });
+		point[i].push_back({ x2,y2 });
+		sort(point[i].begin(), point[i].end());
+	}
+
+	for (int i = 0; i < N; i++) {
+		for (int j = i+1; j < N; j++) {
+
+			int C1 = ccw(point[i][0].first, point[i][0].second, point[i][1].first, point[i][1].second, point[j][0].first,point[j][0].second);
+			int C2 = ccw(point[i][0].first, point[i][0].second, point[i][1].first, point[i][1].second, point[j][1].first, point[j][1].second);
+			int C3 = ccw(point[j][0].first, point[j][0].second, point[j][1].first, point[j][1].second, point[i][0].first, point[i][0].second);
+			int C4 = ccw(point[j][0].first, point[j][0].second, point[j][1].first, point[j][1].second, point[i][1].first, point[i][1].second);
+			
+
+			int a = C1 * C2;
+			int b = C3 * C4;
+			bool flag = false;
+			if (a == 0 && b == 0) {
+
+				if ((point[i][0].first < point[j][0].first && point[i][1].first <point[j][0].first)|| (point[j][1].first < point[i][0].first && point[j][1].first < point[i][1].first))
+				{ flag = true; }
+
+				
+
+				if ((point[i][0].first == point[i][1].first) && (point[j][0].first == point[j][1].first) &&(point[i][1].first == point[j][0].first)) {
+					if ((point[i][0].second < point[j][0].second && point[i][1].second <point[j][0].second) || (point[j][1].second < point[i][0].second && point[j][1].second < point[i][1].second))
+					{ flag = true; }
+				}
+
+				if (!flag) {
+					uni(i, j);
+				}
+				
+			}
+			if (a <= 0 && b <= 0 && flag == false) {
+				uni(i, j);
+			}
+		}
+	}
+
+	int number = 0;
+	int m = 0;
+
+	/*
+	for (int i = 0; i < N; i++) {
+		cout << A[i] << ' ';
+	}	
+	cout << endl;
+	*/
+	
+	for (int i = 0; i < N; i++) {
+		if (A[i] <= -1) {
+			number++;
+			if (m > A[i]) {
+				m = A[i];
+			}
+		}
+	}
+
+	printf("%d\n%d\n", number, -m);
+
+	return 0;
+}
